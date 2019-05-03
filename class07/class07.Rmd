@@ -1,0 +1,327 @@
+---
+title: "Class 7: R functions and packages"
+author: "Brie Diaz"
+date: "4/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## More on function writing
+
+First we will revisit our function from last day
+
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+
+Rest the **rescale()** function
+
+```{r}
+rescale(1:10)
+```
+
+
+
+##rescale(c(1:10, "string"))
+ -> error
+
+
+#cmd + option + i to open up an R coding bar 
+```{r}
+x <- c(1:10, "string")
+!is.numeric(x)
+```
+
+```{r}
+##rescale2(x)
+```
+
+
+
+## Function practice
+
+Write a function to identify NA elements in two vectors
+
+Start with a simple example input where I now what the answer should be. 
+```{r}
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+```
+
+
+```{r}
+is.na(x)
+is.na(y)
+```
+
+```{r}
+which(is.na(x))
+which(is.na(y))
+```
+
+I am looking for the positions where it is TRUE in both vectors....
+```{r}
+is.na(x) & is.na(y)
+```
+
+Take the sum to find how many TRUEs there are (TRUE = 1; FALSE = 0)
+
+```{r}
+sum(is.na(x) & is.na(y))
+```
+
+This is my working snippet of code that I can use as the body of my first function!!
+
+```{r}
+both_na <- function(x,y) {
+  sum(is.na(x) & is.na(y))
+}
+```
+
+
+```{r}
+both_na(x,y)
+```
+
+```{r}
+both_na(c(NA, NA, NA), c(NA, NA, 1))
+```
+
+
+```{r}
+both_na(c(NA, NA, NA), c(1, NA, NA, NA))
+```
+
+
+```{r}
+both_na(c(NA, NA, NA), c(1, NA, NA, NA, NA, NA))
+```
+
+
+
+Check that the length of our inputs are equal 
+
+```{r}
+x <- c(NA, NA, NA)
+y <- c(1, NA, NA, NA, NA, NA)
+length(x) != length(y)
+
+```
+
+```{r}
+both_na2 <- function(x, y) {
+ if(length(x) != length(y)) {
+ stop("Input x and y should be the same length")
+ }
+ sum( is.na(x) & is.na(y) )
+}
+```
+
+
+
+Try the both_na3() function with extra features
+```{r}
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+both_na3(x, y)
+```
+
+
+The which() function finds which positions are TRUE 
+```{r}
+which(c(F, F, T, F, T))
+```
+
+Write a function grade() to determine an overall grade from a vector of student homework assignment scores, dropping the lowest singe assigment score
+
+```{r}
+s1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+sum(s1)
+sum(s1) - min(s1)
+length(s1) -1
+(sum(s1) - min(s1))/(length(s1) -1)
+```
+
+
+Find the minimum score
+```{r}
+min(s1)
+```
+
+Subtract the minimum score from the sum of the vector
+```{r}
+sum(s1) - min(s1)
+```
+
+Divide by the length of the vector -1 (n-1)
+
+```{r}
+(sum(s1) - min(s1))/(length(s1)-1)
+```
+
+
+I got my snippet, now to turn it into my first version of the grade() function
+```{r}
+grade <- function(x) {
+  (sum(x, na.rm =TRUE) - min(x, na.rm =TRUE))/(length(x)-1)
+}
+```
+
+
+OR, if we want the user to be able to determine what to do with NA:
+- because we need to pass the na.rm through the function/s that is/are actually doing the work! 
+```{r}
+grade1 <- function(x, na.rm = TRUE) {
+  if (na.rm) {
+    return((sum(x, na.rm =TRUE) - min(x, na.rm =TRUE))/(length(x)-1))
+  } else {
+    (sum(x) - min(x))/(length(x)-1)
+  }
+}
+```
+
+
+```{r}
+s1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+s2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+grade(s1)
+grade(s2)
+```
+
+
+```{r}
+class <- read.csv("student_homework.csv", row.names = 1)
+```
+
+
+```{r}
+grade(class[1,])
+```
+
+APPLY grade() to the whole class
+
+```{r}
+ans <- apply(class, 1, grade)
+```
+
+```{r}
+sort(ans, decreasing = TRUE)
+```
+
+
+```{r}
+df1
+df2
+```
+
+## One last function example
+
+
+Find the intersection of two sets (two vectors)
+# Start with a simple version of the problem
+
+```{r}
+x <- df1$IDs
+y <- df2$IDs
+
+intersect(x,y)
+```
+
+
+```{r}
+x
+y
+x %in% y
+which(x %in% y)
+x[x %in% y]
+```
+
+
+
+```{r}
+y %in% x
+```
+
+
+```{r}
+gene_intersect <- function(x, y) {
+  cbind(x[x %in% y], y[y %in% x])
+}
+```
+
+
+
+# Improve by simplifying for human consumption
+
+```{r}
+gene_intersect4 <- function(df1, df2, gene.colname="IDs") {
+
+ df1.name <- df1[,gene.colname]
+ df2.name <- df2[,gene.colname]
+
+ df1.inds <- df1.name %in% df2.name
+ df2.inds <- df2.name %in% df1.name
+
+ cbind( df1[ df1.inds, ],
+ exp2=df2[ df2.inds, "exp"] )
+}
+```
+
+
+
+# Improve by simplifying for human consumption
+gene_intersect4 <- function(df1, df2, gene.colname="IDs") {
+
+ df1.name <- df1[,gene.colname]
+ df2.name <- df2[,gene.colname]
+
+ df1.inds <- df1.name %in% df2.name
+ df2.inds <- df2.name %in% df1.name
+
+ cbind( df1[ df1.inds, ],
+ exp2=df2[ df2.inds, "exp"] )
+}
+# Getting closer!
+gene_intersect4(df1, df2)
+#> IDs exp exp2
+#> 2 gene2 1 -2
+#> 3 gene3 1 1
+
+
+
+
+
+
+# Test, break, fix, text again
+df1 <- data.frame(IDs=c("gene1", "gene2", "gene3"),
+ exp=c(2,1,1),
+ stringsAsFactors=FALSE)
+df3 <- data.frame(IDs=c("gene2", "gene2", "gene5", "gene5"),
+ exp=c(-2, NA, 1, 2),
+ stringsAsFactors=FALSE)
+# Works but could do with more spit and polish!
+gene_intersect4(df1, df3)
+#> IDs exp exp2
+#> 1 gene2 1 -2
+#> 2 gene2 1 NA
+#> Warning in data.frame(..., check.names = FALSE): row
+names were found from a short variable and have been
+discarded
+
+```{r}
+merge(df1, df2, by="IDs")
+#> IDs exp.x exp.y
+#> 1 gene2 1 -2
+#> 2 gene3 1 1
+```
+
+
+
+
+
+

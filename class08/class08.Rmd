@@ -1,0 +1,397 @@
+---
+title: "Class 8: Machine Learning"
+author: "Brie Diaz"
+date: "4/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Let's try ot the **kmens()** fnction in R with some made up data
+
+```{r}
+tmp <- c(rnorm(30,-3), rnorm(30,3))
+x <- cbind(x=tmp, y=rev(tmp))
+plot(x)
+```
+
+
+Use the kmeans() function setting k to 2 and nstart=20
+
+```{r}
+km <- kmeans(x, centers =2, nstart=20)
+```
+
+Inspect/print the results
+Q. How many points are in each cluster?
+```{r}
+km$size
+```
+
+- 30
+
+Q. What ‘component’ of your result object details
+         - cluster size? --> the "size" component gives the nmber of points within each cluster
+```{r}
+km$size
+
+```
+         
+         - cluster assignment/membership? --> the "cluster" vector indicates the cluster to which each point is allocated 
+
+```{r}
+km$cluster
+
+```
+
+         - cluster center? --> the "centers" component gives a matrix of cluster centers
+```{r}
+km$centers
+```
+ 
+ 
+Plot x colored by the kmeans cluster assignment and
+ add cluster centers as blue points
+ 
+ 
+```{r}
+plot(x, col=km$cluster)
+points(km$centers, col="blue", pch=18, cex=2)
+```
+ 
+ 
+ ## Hierarchical Clustering
+ 
+Here we don't have to spell out K the number of clusters beforehand but we do have to give it a distance matrix as input
+
+
+```{r}
+d <- dist(x)
+hc <- hclust(d)
+hc
+```
+
+ Let's plot the results
+ 
+```{r}
+plot(hc)
+abline(h=6, col="red")
+abline(h=4, col="blue")
+cutree(hc, h=6)
+
+```
+ 
+ 
+ 
+```{r}
+gp2 <- cutree(hc, k=2)
+gp2
+```
+
+
+```{r}
+gp3 <- cutree(hc, k=3)
+gp3
+```
+
+
+```{r}
+table(gp2)
+table(gp3)
+```
+
+
+```{r}
+table(gp2, gp3)
+```
+
+
+# Step 1. Generate some example data for clustering
+
+```{r}
+x <- rbind(
+ matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2), # c1
+ matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2
+ matrix(c(rnorm(50, mean = 1, sd = 0.3), # c3
+ rnorm(50, mean = 0, sd = 0.3)), ncol = 2))
+colnames(x) <- c("x", "y")
+```
+
+# Step 2. Plot the data without clustering
+
+```{r}
+plot(x)
+```
+
+# Step 3. Generate colors for known clusters
+# (just so we can compare to hclust results)
+```{r}
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+
+```
+
+
+Q. Use the dist(), hclust(), plot() and cutree()
+ functions to return 2 and 3 clusters
+ 
+```{r}
+hc <- hclust(dist(x))
+```
+
+ 
+ 
+```{r}
+plot(hc)
+abline(h=2.3, col="red")
+
+```
+ 
+ 
+Q. How does this compare to your known 'col' groups?
+
+```{r}
+gp2 <- cutree(hc, k=2)
+gp3 <- cutree(hc, k=3)
+
+
+table(gp2)
+table(gp3)
+```
+
+
+```{r}
+plot(x, col=gp3)
+```
+
+ 
+ 
+ 
+ 
+ 
+ 
+ ## Principal Component Analysis (PCA)
+ 
+ We will use the base R **prcomp()** function for PCA today...
+ 
+ let's get some RNAseq data to play with
+ 
+```{r}
+mydata <- read.csv("expression.csv", row.names=1)
+mydata
+```
+ 
+ There are `r nrow(mydata)` genes in this dataset
+ 
+ 
+The transpose function t() flips the columns and rows of your data table
+```{r}
+t(mydata)
+```
+ 
+ 
+ ##Let's do PCA
+```{r}
+pca <- prcomp(t(mydata), scale=TRUE)
+summary(pca)
+```
+ 
+ From the summary of our pca, we can see that PC1 constitutes 92.6% of the variance in the data set 
+ 
+```{r}
+attributes(pca)
+```
+ 
+ 
+ Let's make our first PCA plot - a basic PC1 vs. PC2 2-D plot
+ 
+ 
+```{r}
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+
+```
+ 
+ 
+```{r}
+barplot(pca.var.per, main="Scree Plot", 
+        xlab="Principal Component", ylab="Percent Variation")
+```
+ 
+ 
+ 
+```{r}
+xlab <- paste("PC2 (", pca.var.per[1],"%)",sep="")
+ylab <- paste("PC2 (", pca.var.per[2],"%)",sep="")
+```
+ 
+ 
+```{r}
+mycols <- c(rep("red",5), rep("blue",5))
+```
+ 
+ 
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab=xlab, ylab=ylab, col=mycols)
+```
+ 
+ 
+ 
+ To label the points themselves with what they represent: 
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab=xlab, ylab=ylab, col=mycols)
+text(pca$x[,1], pca$x[,2], colnames(mydata))
+```
+ 
+ 
+ 
+ 
+ Percent variance is often more informative to look at 
+ 
+```{r}
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+```
+ 
+ # Now to perform a PCA on the UK foods dataset
+ First, read the new dataset
+```{r}
+x <- read.csv("UK_foods.csv", row.names = 1)
+```
+ 
+ 
+ Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+ 
+```{r}
+dim(x)
+nrow(x)
+ncol(x)
+```
+ - there are 17 rows and 4 colummns in or data frame 
+ 
+ head()
+```{r}
+head(x)
+```
+ 
+ Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances?
+ - I prefer to set row.names=1 when I input the data because I feel this method is a lot more efficient and straightforward.
+ 
+ 
+ 
+ 
+ ## Spotting major differences and trends 
+ - barplots aren't very helpful 
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+ 
+ 
+ Q3: Changing what optional argument in the above barplot() function results in the following plot?
+ - changing the beside argment to FALSE (or leaving this argument out altogether) will stack the bars on top of each other
+ 
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+ 
+ 
+ Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+ ....I really don't know how to read these plots! 
+ 
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+ 
+ 
+ 
+ 
+ 
+ Q6. What is the main differences between N. Ireland and the other countries of the UK in terms of this data-set?
+ 
+ 
+ - PCA to the rescue! 
+ 
+ ** one important thing to remember: prcomp() expects the observations to be rows and the variables to be columns therefore we need to first transpose our data.frame matrix with the t() transpose function.
+ 
+```{r}
+# Use the prcomp() PCA function 
+pca <- prcomp( t(x) )
+summary(pca)
+```
+ 
+ Q7. Complete the code below to generate a plot of PC1 vs PC2. The second line adds text labels over the data points.
+ 
+```{r}
+# Plot PC1 vs PC2
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x))
+```
+ 
+ Q8. Customize your plot so that the colors of the country names match the colors in our UK and Ireland map and table at start of this document.
+ 
+```{r}
+mycolors <- (c("yellow", "red", "blue", "darkgreen"))
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x), col=mycolors)
+
+```
+ 
+ 
+ 
+ 
+ Below we can use the square of pca$sdev , which stands for “standard deviation”, to calculate how much variation in the original data each PC accounts for.
+ 
+ 
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+```
+ 
+ 
+```{r}
+## or the second row here...
+z <- summary(pca)
+z$importance
+```
+ 
+ 
+ This information can be summarized in a plot of the variances (eigenvalues) with respect to the principal component number (eigenvector number), which is given below.
+ 
+ 
+```{r}
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+ 
+ 
+ ## Digging Deeper (variable loadings)
+ 
+```{r}
+## Lets focus on PC1 as it accounts for > 90% of variance 
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+ 
+ 
+ 
+ Q9: Generate a similar ‘loadings plot’ for PC2. What two food groups feature prominantely and what does PC2 maninly tell us about?
+ 
+ 
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

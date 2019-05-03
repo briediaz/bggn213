@@ -1,0 +1,166 @@
+---
+title: "Section_1B_worksheet"
+author: "Brie Diaz"
+date: "4/19/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("bio3d")
+```
+
+## Improve the analysis code 
+
+```{r}
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+##Q1 What type of object is returned from the read.pdb() function?
+
+```{r}
+is.list(s1)
+```
+- the read.pdb() function reads a PDB file and returns a list 
+
+
+##Q2 What does the trim.pbd() function do?
+
+```{r}
+?trim.pdb
+```
+- Trims a PBD object to a subset of atoms; description: produces a new smaller PDB object, containing a subset of atoms, from a given larger PDB object 
+ 
+ 
+##Q3 What input parameter would turn off the marginal black and gray rectangles in the plots and what do they represent in this case? 
+
+- remove sse or set to FALSE; also, you could set both top = FALSE and bot = FALSE 
+
+```{r}
+?plot.bio3d
+```
+
+plotb3 draws a standard scatter plot with optional secondary structure in the marginal regions
+
+
+
+
+
+
+
+##Q5 Which proteins are more similar to each other in their B-factor trends
+```{r}
+hc <- hclust(dist(rbind(s1.b, s2.b, s3.b)))
+plot(hc)
+```
+
+ - Proteins 1AKE and 1E4Y (represented by s2.b and s3.b, respectively) are more similar to each other
+
+
+## Q6 How would you generalize the original code above to work with any set of input protein structures?
+
+
+### Don't ever start like this: copy and paste each line of function
+makeplot <- function(x) {
+s1 <- read.pdb(x) # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+}
+
+
+### instead, make small working snippets of code
+First, access the proteins sequence from PDP and save as "pseq"
+```{r}
+x <- "4AKE"
+pseq <- read.pdb(x)
+pseq
+
+```
+
+
+Next, trim protein sequence so that it includes only chain A of the protein. 
+```{r}
+pseq.chainA <- trim.pdb(pseq, chain="A", elety="CA")
+pseq.chainA
+```
+
+Next, access the Temperature factor, represented by the "b" vector within the "atom" data frame for this trimmed sequence 
+
+```{r}
+pseq.chainA <- trim.pdb(pseq, chain="A", elety="CA")
+pseq.b <- pseq.chainA$atom$b
+
+```
+
+
+Make a line plot of the Temperature Factor data with the y-axis labeled "Bfactor"
+
+
+```{r}
+pseq.chainA <- trim.pdb(pseq, chain="A", elety="CA")
+pseq.b <- pseq.chainA$atom$b
+plotb3(pseq.b, sse=pseq.chainA, type = "l", ylab="Bfactor")
+```
+
+
+
+Finally, turn overall working snippets into a function!
+
+- The input(x) is a name of a protein sequence in PDB; simply set x = "*name_of_PDB_seq*" in the function itself
+
+- the function will:
+1. read the PDF sequence you assign to it
+2. trim your protein sequence to include chain A alpha carbons; creates a new PDB object based on a selection of atoms
+3. access the B factor (Temperature Factor) for all atoms in the trimmed protein sequence
+4. produce a line plot of Residue vs. B Factor --> this is the overall output of the function!
+
+
+
+```{r}
+makeplot <- function(x) {
+  pseq <- read.pdb(x)
+  pseq.chainA <- trim.pdb(pseq, chain="A", elety="CA")
+  pseq.b <- pseq.chainA$atom$b
+  plotb3(pseq.b, sse=pseq.chainA, type = "l", ylab="Bfactor")
+}
+```
+
+
+Test out new function: 
+
+```{r}
+makeplot("4AKE")
+makeplot("1AKE")
+makeplot("1E4Y")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
