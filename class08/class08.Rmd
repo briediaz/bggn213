@@ -2,7 +2,7 @@
 title: "Class 8: Machine Learning"
 author: "Brie Diaz"
 date: "4/26/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
