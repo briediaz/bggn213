@@ -2,7 +2,7 @@
 #' title: "Class 5: R Graphics"
 #' author: "Brie Diaz"
 #' date: "Fri Apr 19 13:25:51 2019"
-#' ---
+#' output: github_document
 
 
 # Class 5 R graphics and plots
