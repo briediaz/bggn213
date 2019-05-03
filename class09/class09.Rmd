@@ -2,7 +2,7 @@
 title: "Unsupervised Mini Learning Project"
 author: "Brie Diaz"
 date: "5/1/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
