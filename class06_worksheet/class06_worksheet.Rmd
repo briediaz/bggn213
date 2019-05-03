@@ -2,9 +2,7 @@
 title: "Section_1B_worksheet"
 author: "Brie Diaz"
 date: "4/19/2019"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
