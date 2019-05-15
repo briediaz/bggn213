@@ -1,0 +1,99 @@
+---
+title: "Class 13: Genome Informatics Part I"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+mxl <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+head(mxl)
+```
+```{r}
+table(mxl$Genotype..forward.strand.)
+```
+```{r}
+# proportion
+table(mxl$Genotype..forward.strand.)/nrow(mxl)
+
+```
+## Quality scores in FASTQ files
+
+
+```{r}
+# help
+# library(seqinr)
+# library(gtools)
+# phred <- asc( s2c("DDDDCDEDCDDDDBBDDDCC@") ) - 33phred
+## D D D D C D E D C D D D D B B D D D C C @
+## 35 35 35 35 34 35 36 35 34 35 35 35 35 33 33 35 35 35 34 34 31
+# prob <- 10**(-phred/10)
+```
+
+## Section 4: Population Scale Analysis
+```{r}
+expr <- read.table("rs8067378_ENSG00000172057.6.txt")
+summary(expr)
+
+```
+
+
+#Break it down and access rows that contain each genotype
+```{r}
+indsG <- (expr$geno == "G/G")
+summary(expr[indsG,]$exp)
+hist(expr[indsG,]$exp)
+```
+
+
+
+
+```{r}
+indsA <- (expr$geno == "A/A")
+summary(expr[indsA,]$exp)
+hist(expr[indsA,]$exp)
+boxplot(expr[indsA,]$exp)
+```
+
+
+```{r}
+indsAG <- (expr$geno == "A/G")
+summary(expr[indsAG,]$exp)
+hist(expr[indsAG,]$exp)
+```
+
+First try at a boxplot to show this data
+```{r}
+# y ~ grp
+boxplot(exp ~ geno, data = expr, notch=TRUE, xlab="rs8067378 genotype", ylab="ENSG00000172057.4 (RPKM)")
+```
+
+
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+## Boxplot
+ggplot(expr, aes(geno, exp)) + geom_boxplot()
+
+## Histogram of the exp column with ggplot2
+ggplot(expr, aes(exp, fill = geno)) + geom_density(alpha = 0.2)
+
+# Boxplot with the data shown
+ggplot(expr, aes(geno, exp, fill=geno)) + 
+  geom_boxplot(notch=TRUE, outlier.shape = NA) + 
+  geom_jitter(shape=16, position=position_jitter(0.2), alpha=0.4)
+```
+
+
+
+
+
+
+
+
