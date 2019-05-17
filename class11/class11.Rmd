@@ -1,0 +1,179 @@
+---
+title: "Class 11: Structural Bioinformatics (Part I)"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Revisit PDB
+
+Q1: Download a CSV file from the PDB site (accessible from “Analyze” -> “PDB Statistics” > “by Experimental Method and Molecular Type”. Move this CSV file into your RStudio project and determine the percentage of structures solved by X-Ray and Electron Microscopy. Also can you determine what proportion of structures are protein? 
+
+Download a CSV file from: http://www.rcsb.org/stats/summary on 2019-05-08
+
+```{r}
+db <- read.csv("Data Export Summary.csv", row.names= 1)
+head(db)
+```
+
+```{r}
+## Total number of structures in the PDB database
+sum(db$Total)
+
+## Percentages of structures solved by X-Ray and Electron Microscopy
+(db$Total)/(sum(db$Total))*100
+```
+89.3 % are solved by X-ray; 2.1% are solved by Electron Microscopy. 
+
+
+
+What percent are protein?
+```{r}
+(sum(db$Proteins) / sum(db$Total))*100
+```
+92. 76%
+
+
+
+Q2: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+1157 proteins
+
+
+
+## Section 3. Using Bio3D
+
+Let's read the PDB file we downloaded into R to see how things ive in this place 
+
+```{r}
+library(bio3d)
+```
+
+
+```{r}
+pdb <- read.pdb("1hsg.pdb")
+pdb
+```
+
+
+```{r}
+aa321(pdb$seqres)
+```
+
+
+
+```{r}
+pdb$atom
+```
+
+
+
+##Atom selection examples
+
+Let's select residue 1
+```{r}
+inds <- atom.select(pdb, resno = 10)
+```
+
+
+
+
+```{r}
+pdb$atom[inds$atom,]
+```
+
+
+### Make a protein only and ligand only PDB file
+
+Here we need to select our protein with `atom.select()` then use `write.pdb()`
+
+```{r}
+prot <- atom.select(pdb, "protein", value = TRUE)
+prot
+```
+
+```{r}
+write.pdb(prot, file="1hsg_protein")
+```
+
+```{r}
+lig <- atom.select(pdb, "ligand", value=TRUE)
+lig
+```
+
+```{r}
+write.pdb(lig, file="1hsg_ligand.pdb")
+```
+
+```{r}
+#install.packages("rgl")
+#install.packages("xquart2")
+
+```
+
+```{r}
+#install.packages("devtools")
+```
+
+
+```{r}
+devtools::install_bitbucket("Grantlab/bio3d-view")
+library("bio3d.view")
+
+```
+```{r}
+view(pdb,"overview", col="sse")
+```
+
+```{r}
+view(pdb, "overview", col="sse")
+```
+
+
+```{r}
+pdbex <- read.pdb("1he1")
+```
+
+```{r}
+modes <- nma(pdbex)
+m7 <- mktrj(modes, mode=7, file="mode_7.pdb")
+view(m7, col=vec2color(rmsf(m7)))
+```
+
+
+Download some example PDB files
+```{r}
+ids <- c("1TND_B","1AGR_A","1TAG_A","1GG2_A","1KJY_A","4G5Q_A")
+files <- get.pdb(ids, split=TRUE)
+```
+
+
+```{r}
+pdbs <- pdbaln(files, fit = TRUE)
+pdbs
+```
+
+
+
+```{r}
+pc.xray <- pca(pdbs)
+```
+
+
+```{r}
+plot(pc.xray)
+```
+
+
+
+```{r}
+# Visualize first principal component
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+```
+
+
+
+
+
