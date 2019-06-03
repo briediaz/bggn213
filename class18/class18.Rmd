@@ -1,0 +1,316 @@
+---
+title: "Class 18: Cancer Genomics"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We need the bioconductor pakage **GenomicDataCommons** 
+
+
+```{r eval=FALSE}
+BiocManager::install("GenomicDataCommons")
+```
+
+```{r}
+library(GenomicDataCommons)
+status()
+```
+
+
+
+
+```{r}
+library(GenomicDataCommons)
+library(TCGAbiolinks)
+library(maftools)
+```
+
+```{r}
+projects <- getGDCprojects()
+head(projects)
+```
+
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%
+  aggregations()
+head(cases_by_project)
+```
+
+
+
+
+Note that the facet() and aggregations() functions here are from the GenomicDataCommons package and act to group all cases by the project id and then count them up.
+
+
+Write the R code to make a barplot of the cases per project. Lets plot this data with a log scale for the y axis (log="y"), rotated axis labels (las=2) and color the bar coresponding to the TCGA-PAAD project.
+
+```{r}
+x <- cases_by_project$project.project_id
+
+# Make a custom color vector for our plot; we want the TCGA-PAAD bar to be red
+colvec <- rep("lightblue", nrow(x))
+colvec[x$key == "TCGA-PAAD"] <- "red"
+
+
+# Plot with 'log' for y axis and rotate labels with 'las'
+#par(___)  
+barplot(x$doc_count, names.arg = x$key, log="y", col=colvec, las=2)
+```
+
+
+
+
+Lets explore some other functions from the related TCGAbiolinks package.
+
+We can use the getSampleFilesSummary() function to determine for a given project how many cases and what type of data we have available for each case:
+
+
+```{r}
+samp <- getSampleFilesSummary("TCGA-PAAD")
+```
+
+
+```{r}
+head(samp)
+```
+
+Now we can use GDCquery() function to focus in on a particular data type that we are interested in. For example, to answer our second question from above - namely ‘find all gene expression data files for all pancreatic cancer patients’:
+
+```{r}
+query <- GDCquery(project="TCGA-PAAD",
+                 data.category="Transcriptome Profiling",
+                 data.type="Gene Expression Quantification")
+
+ans <- getResults(query)
+```
+
+
+```{r}
+head(ans)
+```
+
+
+
+```{r}
+View(ans)
+```
+
+```{r}
+nrow(ans)
+```
+
+
+
+# 4. Variant analysis with R
+
+```{r}
+maf.file <- GDCquery_Maf(tumor="PAAD", pipelines = "mutect")
+```
+
+
+```{r}
+head(maf.file)
+```
+
+
+
+MAF analysis
+
+The MAF file contents is now stored as a dataframe and the maftools package workflow, which starts with a MAF file or dataframe, can proceed, starting with reading the pancreatic cancer MAF file.
+
+```{r}
+vars = read.maf(maf = maf.file, verbose = FALSE)
+```
+
+
+Plotting MAF summary.
+
+```{r}
+plotmafSummary(vars)
+```
+
+Drawing oncoplots
+
+```{r}
+oncoplot(maf = vars, top = 10)
+```
+
+
+
+```{r}
+# Oncoplot for our top 10 most frequently mutated genes
+pdf("oncoplot_panc.pdf")
+oncoplot(maf = vars, top = 10, fontSize = 12)
+dev.off()
+```
+
+
+Oncostrip
+
+```{r}
+oncostrip(maf=vars, genes=c("KRAS", "TP53"))
+```
+
+
+
+## Part 2: Designing a personalized cancer vaccine
+
+```{r}
+library(bio3d)
+```
+
+
+```{r}
+seqs <- read.fasta("lecture18_sequences.fa")
+```
+
+
+
+```{r}
+seqaln(seqs)
+```
+
+```{r}
+ide <- conserv(seqs, method = "identity")
+ide
+```
+
+```{r}
+gaps <- gap.inspect(seqs)
+gap.inds <- gaps$t.inds
+gap.inds
+```
+
+
+
+
+Find all locations where there are mismatches! - Find the sites (i.e. amino acids that are different)
+
+```{r}
+mismatch.inds <- which(ide < 1.0)
+mismatch.inds
+```
+
+
+Find all mismatches that are not gaps
+Find the positions in mismatch.inds that are NOT in gap.inds
+```{r}
+tumor.sites <- mismatch.inds[!mismatch.inds %in% gap.inds]
+tumor.sites
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+seqs$ali[,tumor.sites]
+```
+
+```{r}
+ids <- paste(seqs$ali[1,tumor.sites],
+      tumor.sites,
+      seqs$ali[2, tumor.sites], sep="")
+```
+
+
+
+
+
+
+
+
+```{r}
+start.ind <- tumor.sites - 8
+end.ind <- tumor.sites + 8
+
+tumor <- NULL
+for(i in 1:length(start.ind)) {
+  tumor <- seqbind(tumor, 
+                   seqs$ali[2,start.ind[i]:end.ind[(i)]])
+}
+ 
+tumor               
+
+```
+
+```{r}
+write.fasta(ids=ids, ali=tumor, file="subsequences.fa")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
