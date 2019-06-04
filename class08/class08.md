@@ -3,7 +3,7 @@ Class 8: Machine Learning
 Brie Diaz
 4/26/2019
 
-Let's try ot the **kmens()** fnction in R with some made up data
+Let's try ot the **kmeans()** fnction in R with some made up data
 
 ``` r
 tmp <- c(rnorm(30,-3), rnorm(30,3))
@@ -53,8 +53,8 @@ km$centers
 ```
 
     ##           x         y
-    ## 1 -2.936373  2.777527
-    ## 2  2.777527 -2.936373
+    ## 1 -3.096402  2.973907
+    ## 2  2.973907 -3.096402
 
 Plot x colored by the kmeans cluster assignment and add cluster centers as blue points
 
@@ -113,8 +113,8 @@ gp3 <- cutree(hc, k=3)
 gp3
 ```
 
-    ##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 3 2 2 3
-    ## [36] 3 2 3 2 2 2 3 2 2 2 2 3 2 2 3 2 2 2 2 3 2 2 2 2 2
+    ##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 3 3
+    ## [36] 2 2 2 2 2 2 3 2 2 2 2 2 2 2 2 3 2 2 2 2 3 2 3 2 2
 
 ``` r
 table(gp2)
@@ -130,7 +130,7 @@ table(gp3)
 
     ## gp3
     ##  1  2  3 
-    ## 30 22  8
+    ## 30 24  6
 
 ``` r
 table(gp2, gp3)
@@ -139,7 +139,7 @@ table(gp2, gp3)
     ##    gp3
     ## gp2  1  2  3
     ##   1 30  0  0
-    ##   2  0 22  8
+    ##   2  0 24  6
 
 Step 1. Generate some example data for clustering
 =================================================
@@ -200,7 +200,7 @@ table(gp2)
 
     ## gp2
     ##   1   2 
-    ##  49 101
+    ##  46 104
 
 ``` r
 table(gp3)
@@ -208,7 +208,7 @@ table(gp3)
 
     ## gp3
     ##  1  2  3 
-    ## 49 47 54
+    ## 46 57 47
 
 ``` r
 plot(x, col=gp3)

@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-Let's try ot the **kmens()** fnction in R with some made up data
+Let's try ot the **kmeans()** fnction in R with some made up data
 
 ```{r}
 tmp <- c(rnorm(30,-3), rnorm(30,3))
