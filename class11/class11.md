@@ -3633,8 +3633,8 @@ modes <- nma(pdbex)
     ## Warning in nma.pdb(pdbex): Possible multi-chain structure or missing in-structure residue(s) present
     ##   Fluctuations at neighboring positions may be affected.
 
-    ##  Building Hessian...     Done in 0.326 seconds.
-    ##  Diagonalizing Hessian...    Done in 9.908 seconds.
+    ##  Building Hessian...     Done in 0.295 seconds.
+    ##  Diagonalizing Hessian...    Done in 11.045 seconds.
 
 ``` r
 m7 <- mktrj(modes, mode=7, file="mode_7.pdb")
