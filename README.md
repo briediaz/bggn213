@@ -24,7 +24,7 @@ My class content incldes:
 
 - Class 15: [Pathway Analysis from RNA-Seq Results](https://github.com/briediaz/bggn213/blob/master/class15/class15.md)
 
-- Class 17: [Biological Network Analysis]()
+- Class 17: [Biological Network Analysis](https://github.com/briediaz/bggn213/blob/master/class17/class17.md)
 
 - Class 18: [Cancer Genomics](https://github.com/briediaz/bggn213/blob/master/class18/class18.md)
 
